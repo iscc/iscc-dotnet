@@ -7,6 +7,7 @@ namespace ISCCTests
 {
     using System.IO;
     using System.Reflection;
+    using System.Text.RegularExpressions;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Xunit.Sdk;
@@ -64,24 +65,52 @@ namespace ISCCTests
             return data.ToObject<List<object[]>>();
         }
 
+
+        /// <summary>
+        /// Breakout Test JSON for the specific test into inputs and outputs.
+        /// </summary>
+        /// <param name="testMethod"></param>
+        /// <param name="deserialized"></param>
+        /// <returns></returns>
         private IEnumerable<object[]> HandleTestParameters(string testMethod, JObject deserialized)
         {
 
-            var testReturn = new List<object[]>();
-            foreach (var item in deserialized.AsJEnumerable())
+            var testReturn = new List<TestTheoryJson>();
+            var jobjectMatcher = new Regex(@"({(.)*})|(\[(.)*\])");
+
+            foreach (var item in deserialized.Properties().Where(t => t.Name == testMethod))
             {
                 Console.WriteLine(item);
 
-                var theFirst = item.First;
+                var tests = item.Value.ToObject<JObject>().Properties();
 
-
-                var testItem = new TestTheoryJson()
+                foreach(var test in tests)
                 {
-                    TestName = item.First.ToString()
-                };
+                    var testName = test.Name;
+                    var testContents = JObject.Parse(test.Value.ToString());
+
+                    var inputs = testContents.Properties().Single(t => t.Name == "inputs").Value;
+                    var outputs = testContents.Properties().Single(t => t.Name == "outputs").Value;
+
+                    var theory = new TestTheoryJson();
+                    theory.TestName = testName;
+
+                    theory.inputs = JArray.Parse(inputs.ToString()).ToObject<string[]>();
+
+                    if (Regex.IsMatch(outputs.ToString(), @"({(.)*})|(\[(.)*\])$"))
+                    {
+                        theory.outputs = JArray.Parse(outputs.Value<string>().ToString()).ToObject<string[]>();
+                    }
+                    else
+                    {
+                        theory.outputs = outputs.Value<string>();
+                    }
+
+                    testReturn.Add(theory);
+                }
             }
 
-            return  testReturn;
+            return new List<object[]>();
         }
     }
 }

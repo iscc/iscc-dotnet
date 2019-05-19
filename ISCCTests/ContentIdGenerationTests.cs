@@ -15,7 +15,7 @@ namespace ISCCTests
             //contentTextBuilder = new Mock<IContentIdTextBuilder>( new ContentIdTextBuilder()).Object;
         }
 
-        [Theory, InlineData("")]
+        [Theory]
         [JsonFileData("testfiles/test_data.json")]
         public void content_id_text(string text)
         {
