@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace ISCCTests
@@ -54,13 +55,33 @@ namespace ISCCTests
             if (string.IsNullOrEmpty(_propertyName))
             {
                 //whole file is the data
-                return JsonConvert.DeserializeObject<List<object[]>>(fileData);
+                return HandleTestParameters(testMethod.Name, JsonConvert.DeserializeObject<JObject>(fileData));
             }
 
             // Only use the specified property as the data
             var allData = JObject.Parse(fileData);
             var data = allData[_propertyName];
             return data.ToObject<List<object[]>>();
+        }
+
+        private IEnumerable<object[]> HandleTestParameters(string testMethod, JObject deserialized)
+        {
+
+            var testReturn = new List<object[]>();
+            foreach (var item in deserialized.AsJEnumerable())
+            {
+                Console.WriteLine(item);
+
+                var theFirst = item.First;
+
+
+                var testItem = new TestTheoryJson()
+                {
+                    TestName = item.First.ToString()
+                };
+            }
+
+            return  testReturn;
         }
     }
 }
