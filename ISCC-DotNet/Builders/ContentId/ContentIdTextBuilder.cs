@@ -8,9 +8,9 @@ namespace ISCC.Builders.ContentId
         {
         }
 
-        public byte GetTextContentId(string text, int version = 0)
+        public string GetTextContentId(string text, int version = 0)
         {
-            return 0x1;
+            return String.Empty;
         }
     }
 }

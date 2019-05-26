@@ -2,6 +2,6 @@
 {
     public interface IContentIdTextBuilder
     {
-        byte GetTextContentId(string text, int version = 0);
+        string GetTextContentId(string text, int version = 0);
     }
 }
